@@ -59,32 +59,44 @@ const setupGame = (): GameState => {
 
 //Scoring
 const calculateHandScore = (hand: Hand): number => {
-  
+  const handWithoutAcesOrFaces = hand.filter(isNumber);
+  const faces = hand.filter(isFace)
+  const aces = hand.filter(isAce)
 
+  const totalValueOfNumbers = handWithoutAcesOrFaces.reduce((total, currentCard) => {
+    return total + Number(currentCard.rank);
+  }, 0);
 
-  return hand.reduce((accumulatedTotal, currentCard) => {
-      return accumulatedTotal + cardRankToScore(currentCard.rank);
-  }, 0)
+  const totalValueOfFaces = faces.length * 10;
+
+  let runningHandScore = totalValueOfNumbers + totalValueOfFaces;
+
+  aces.forEach((_, index) => {
+    const maximumCurrentAcePlay = 11;
+    const minimumFutureAcesPlay = (aces.length - (index + 1));
+
+    const isElevenSafe = runningHandScore + maximumCurrentAcePlay + minimumFutureAcesPlay <= 21
+
+    if (isElevenSafe) {
+      runningHandScore += 11;
+    } else {
+      runningHandScore += 1
+    }
+  });
+
+  return runningHandScore;
 };
 
-const cardRankToScore = (cardRank: CardRank): number => {
-  const rankToScoreMap = {
-    "ace": 1,
-    "2": 2,
-    "3": 3,
-    "4": 4,
-    "5": 5,
-    "6": 6,
-    "7": 7,
-    "8": 8,
-    "9": 9,
-    "10": 10,
-    "jack": 10,
-    "queen": 10,
-    "king": 10,
-  }
+const isFace = (card: Card): boolean => {
+  return card.rank === 'jack' || card.rank === 'queen' || card.rank === 'king';
+}
 
-  return rankToScoreMap[cardRank];
+const isAce = (card: Card): boolean => {
+    return card.rank === 'ace';
+}
+
+const isNumber = (card: Card): boolean => {
+  return !isAce(card) && !isFace(card);
 }
 
 const determineGameResult = (state: GameState): GameResult => {
