@@ -99,16 +99,82 @@ const isNumber = (card: Card): boolean => {
   return !isAce(card) && !isFace(card);
 }
 
-const determineGameResult = (state: GameState): GameResult => {
-  return "no_result";
+const isHandBlackJack = (hand: Hand): boolean => {
+  if (hand.length !== 2) {
+    return false;
+  }
+
+  const [firstCard, secondCard] = hand;
+
+  const isFirstCardAce = isAce(firstCard);
+  const isFirstCardFace = isFace(firstCard);
+  const isSecondCardAce = isAce(secondCard);
+  const isSecondCardFace = isFace(secondCard);
+
+  if ((isFirstCardAce && isSecondCardFace) || (isFirstCardFace && isSecondCardAce)) {
+      return true;
+  }
+
+  return false;
+}
+
+const determineGameResult = ({ playerHand, dealerHand }: GameState): GameResult => {
+  const playersHandScore = calculateHandScore(playerHand)
+  const dealersHandScore = calculateHandScore(dealerHand)
+
+  const isPlayerHandBlackJack = isHandBlackJack(playerHand);
+  const isDealerHandBlackJack = isHandBlackJack(dealerHand);
+
+  if (isPlayerHandBlackJack && isDealerHandBlackJack) {
+    return 'draw'
+  } else if (isPlayerHandBlackJack) {
+    return 'player_win'
+  } else if (isDealerHandBlackJack) {
+    return 'dealer_win';
+  }
+  
+  if (playersHandScore > 21) {
+    return 'dealer_win';
+  }
+  
+  if (dealersHandScore > 21) {
+    return 'player_win';
+  }
+  
+  if (playersHandScore === dealersHandScore) {
+    return 'draw';
+  }
+
+  if (dealersHandScore > playersHandScore) {
+    return 'dealer_win'
+  }
+
+  if (playersHandScore > dealersHandScore) {
+    return 'player_win'
+  }
+
+  return 'no_result';
 };
 
 //Player Actions
 const playerStands = (state: GameState): GameState => {
+  const dealerHandScore = calculateHandScore(state.dealerHand);
+
+  if (dealerHandScore > 16) {
+    return {
+      ...state,
+      turn: "dealer_turn",
+    };
+  }
+
+  const { card, remaining } = takeCard(state.cardDeck);
+
   return {
     ...state,
+    cardDeck: remaining,
+    dealerHand: [...state.dealerHand, card],
     turn: "dealer_turn",
-  };
+  }
 };
 
 const playerHits = (state: GameState): GameState => {

@@ -185,8 +185,8 @@ describe("Determining the winner", () => {
     expect(calculateHandScore(notBlackJack)).toBe(21);
     expect(determineGameResult(game)).toBe("player_win");
 
-    game.playerHand = blackJack;
     game.dealerHand = blackJack;
+    game.playerHand = blackJack;
     expect(determineGameResult(game)).toBe("draw");
   });
 });
