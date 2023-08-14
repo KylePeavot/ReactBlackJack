@@ -58,24 +58,27 @@ const setupGame = (): GameState => {
 };
 
 //Scoring
+//------ Start of Kyle's code ------
 const calculateHandScore = (hand: Hand): number => {
-  const handWithoutAcesOrFaces = hand.filter(isNumber);
+  const numbers = hand.filter(isNumber);
   const faces = hand.filter(isFace)
   const aces = hand.filter(isAce)
 
-  const totalValueOfNumbers = handWithoutAcesOrFaces.reduce((total, currentCard) => {
+  const totalValueOfNumbers = numbers.reduce((total, currentCard) => {
     return total + Number(currentCard.rank);
   }, 0);
-
   const totalValueOfFaces = faces.length * 10;
 
   let runningHandScore = totalValueOfNumbers + totalValueOfFaces;
 
   aces.forEach((_, index) => {
-    const maximumCurrentAcePlay = 11;
     const minimumFutureAcesPlay = (aces.length - (index + 1));
 
-    const isElevenSafe = runningHandScore + maximumCurrentAcePlay + minimumFutureAcesPlay <= 21
+    //INFO: Playing an eleven with your ace is safe if it _won't_ force future aces to go bust if they hold the minimum value
+    //e.g. The runningHandScore is 8 and there are two Aces left.
+    //     Playing 11 with the current Ace is safe because 8 + 11 + 1 = 20
+    //     This is safe because 20 will not force the player to go bust 
+    const isElevenSafe = runningHandScore + 11 + minimumFutureAcesPlay <= 21
 
     if (isElevenSafe) {
       runningHandScore += 11;
@@ -176,6 +179,8 @@ const playerStands = (state: GameState): GameState => {
     turn: "dealer_turn",
   }
 };
+
+//------ End of Kyle's code ------
 
 const playerHits = (state: GameState): GameState => {
   const { card, remaining } = takeCard(state.cardDeck);
