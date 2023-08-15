@@ -136,17 +136,17 @@ const determineGameResult = ({ playerHand, dealerHand }: GameState): GameResult 
     return 'dealer_win';
   }
   
+  if (playersHandScore === dealersHandScore) {
+    return 'draw';
+  }
+
   if (playersHandScore > 21) {
     return 'dealer_win';
   }
   
   if (dealersHandScore > 21) {
     return 'player_win';
-  }
-  
-  if (playersHandScore === dealersHandScore) {
-    return 'draw';
-  }
+  }  
 
   if (dealersHandScore > playersHandScore) {
     return 'dealer_win'
